@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Interview Coach | Facial & Vocal Analysis Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulsing-dot { animation: pulse-ring 1.8s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen custom-scrollbar antialiased">
+  
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            Interview Preparation AI Coach
+            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold">Engine v1.0</span>
+          </h1>
+          <p class="text-xs text-slate-400">MediaPipe FaceMesh Action Units &bull; Audio DSP Prosody &bull; Local Whisper ASR</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Engine Online (:5001)
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Column: Input / Recording / Media (5 cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-6">
+        
+        <!-- Practice Prompt Card -->
+        <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-900/60 border border-slate-800 shadow-xl">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Suggested Practice Question</span>
+            <button id="btnNewPrompt" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Shuffle
+            </button>
+          </div>
+          <p id="promptText" class="text-sm font-medium text-slate-200">
+            "Tell me about a complex technical challenge you solved, and how you communicated trade-offs with stakeholders."
+          </p>
+        </div>
+
+        <!-- Video Input Section -->
+        <div class="rounded-2xl bg-slate-900/90 border border-slate-800 p-5 shadow-xl flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              Response Capture
+            </h2>
+            <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
+              <button id="tabWebcam" class="px-2.5 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white transition">Webcam</button>
+              <button id="tabUpload" class="px-2.5 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition">Upload Clip</button>
+            </div>
+          </div>
+
+          <!-- Tab Content: Live Webcam -->
+          <div id="sectionWebcam" class="flex flex-col gap-3">
+            <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center">
+              <video id="liveVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+              <video id="playbackVideo" controls class="w-full h-full object-cover hidden"></video>
+              
+              <!-- Camera off placeholder -->
+              <div id="camPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 text-center p-4">
+                <div class="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center mb-3 border border-slate-800 text-slate-400">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <p class="text-sm font-medium text-slate-300">Camera preview inactive</p>
+                <p class="text-xs text-slate-500 max-w-xs mt-1">Click "Start Webcam" below to enable camera and microphone permissions.</p>
+              </div>
+
+              <!-- Live Recording Overlay Tag -->
+              <div id="recIndicator" class="hidden absolute top-3 left-3 flex items-center gap-2 px-3 py-1 rounded-full bg-rose-600/90 text-white text-xs font-semibold backdrop-blur shadow-md">
+                <span class="w-2.5 h-2.5 rounded-full bg-white pulsing-dot"></span>
+                <span>REC</span>
+                <span id="recTimer" class="font-mono ml-1">00:00</span>
+              </div>
+            </div>
+
+            <!-- Webcam Controls -->
+            <div class="flex items-center gap-2">
+              <button id="btnToggleCam" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs flex items-center justify-center gap-2 border border-slate-700 transition">
+                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span id="btnToggleCamText">Start Webcam</span>
+              </button>
+
+              <button id="btnRecord" disabled class="flex-1 py-2.5 px-4 rounded-xl bg-rose-600/50 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-rose-600/20">
+                <span class="w-3 h-3 rounded-full bg-white"></span>
+                <span id="btnRecordText">Start Recording</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content: Upload Clip -->
+          <div id="sectionUpload" class="hidden flex flex-col gap-3">
+            <label for="videoFileInput" class="border-2 border-dashed border-slate-800 hover:border-indigo-500/50 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer bg-slate-950/40 hover:bg-indigo-950/10 transition group">
+              <svg class="w-10 h-10 text-slate-500 group-hover:text-indigo-400 mb-2 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              <span class="text-sm font-medium text-slate-300 group-hover:text-white">Click to select video or audio file</span>
+              <span class="text-xs text-slate-500 mt-1">MP4, WebM, MOV, MKV, WAV (up to 150MB)</span>
+              <input type="file" id="videoFileInput" accept="video/*,audio/*" class="hidden">
+            </label>
+            <div id="uploadSelectedInfo" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+              <span id="uploadFilename" class="truncate font-mono">sample.mp4</span>
+              <span id="uploadFilesize" class="text-slate-500">2.4 MB</span>
+            </div>
+          </div>
+
+          <!-- Quick Test Demo Clip Button -->
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="text-xs text-slate-400">Need a quick test?</span>
+            <button id="btnLoadDemo" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 hover:text-white border border-slate-700 transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Load Demo Video Clip
+            </button>
+          </div>
+
+          <!-- Primary Submit Analysis Button -->
+          <button id="btnAnalyze" disabled class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm flex items-center justify-center gap-2 transition shadow-xl shadow-indigo-600/30">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Analyze Interview Response</span>
+          </button>
+
+          <!-- Loading Indicator -->
+          <div id="loadingBox" class="hidden p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30 flex flex-col gap-2">
+            <div class="flex items-center gap-3">
+              <div class="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-xs font-semibold text-indigo-300" id="loadingStageText">Demuxing audio & video streams...</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div class="bg-indigo-500 h-1.5 rounded-full animate-pulse" style="width: 75%"></div>
+            </div>
+            <span class="text-[11px] text-slate-400">Extracting Action Units, prosodic pitch, and running Whisper ASR...</span>
+          </div>
+
+          <!-- Error Alert -->
+          <div id="errorBox" class="hidden p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs"></div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Coaching Dashboard & Metrics (7 cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Default Empty State -->
+        <div id="emptyState" class="h-full min-h-[460px] rounded-2xl bg-slate-900/40 border border-slate-800/80 p-8 flex flex-col items-center justify-center text-center">
+          <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-slate-500">
+            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <h3 class="text-base font-semibold text-slate-200">Awaiting Response Analysis</h3>
+          <p class="text-xs text-slate-400 max-w-sm mt-1.5">
+            Record your answer via webcam or upload an interview clip to receive an executive-level breakdown of confidence, clarity, pacing, and facial presence.
+          </p>
+        </div>
+
+        <!-- Populated Results Dashboard -->
+        <div id="resultsDashboard" class="hidden flex flex-col gap-6">
+
+          <!-- Hero Score Card -->
+          <div class="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">AI Coach Evaluation</div>
+              <h2 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                Overall Interview Readiness
+                <span id="readinessBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Executive Ready</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-1 max-w-md">Multi-signal synthesis evaluating speech prosody, facial Action Units, eye contact stability, and verbal articulation.</p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <div class="relative w-24 h-24 flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path class="text-slate-800" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path id="overallScoreRing" class="text-indigo-500 transition-all duration-1000 ease-out" stroke-dasharray="85, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="overallScoreNum" class="text-2xl font-black text-white">--</span>
+                  <span class="text-[10px] text-slate-400 font-semibold uppercase">Score</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Core Scoring Pillars -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            
+            <!-- Confidence Pillar -->
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+                <span>Confidence</span>
+                <span id="scoreConfidenceNum" class="text-sm font-bold text-white">--</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="barConfidence" class="bg-indigo-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+              </div>
+              <span class="text-[11px] text-slate-500">Vocal energy & poise stability</span>
+            </div>
+
+            <!-- Clarity Pillar -->
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+                <span>Clarity</span>
+                <span id="scoreClarityNum" class="text-sm font-bold text-white">--</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="barClarity" class="bg-violet-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+              </div>
+              <span class="text-[11px] text-slate-500">Pacing cadence & zero fillers</span>
+            </div>
+
+            <!-- Engagement Pillar -->
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+                <span>Engagement</span>
+                <span id="scoreEngagementNum" class="text-sm font-bold text-white">--</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="barEngagement" class="bg-emerald-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+              </div>
+              <span class="text-[11px] text-slate-500">Facial warmth & pitch dynamics</span>
+            </div>
+
+          </div>
+
+          <!-- Granular Signal Breakdown (Tabs or 2 Cards) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- Facial Geometry Metrics -->
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col gap-3">
+              <div class="text-xs font-semibold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Facial Presence & Geometry
+              </div>
+              <div class="grid grid-cols-2 gap-2.5 text-xs">
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Eye Contact</div>
+                  <div id="metricEyeContact" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Blink Rate</div>
+                  <div id="metricBlinkRate" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Warmth Score</div>
+                  <div id="metricWarmth" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Head Poise Stability</div>
+                  <div id="metricPoise" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vocal Prosody & Pacing Metrics -->
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col gap-3">
+              <div class="text-xs font-semibold text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
+                Vocal Prosody & Pacing
+              </div>
+              <div class="grid grid-cols-2 gap-2.5 text-xs">
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Pacing Speed</div>
+                  <div id="metricPacing" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Pitch Dynamic</div>
+                  <div id="metricPitch" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Volume Projection</div>
+                  <div id="metricEnergy" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                  <div class="text-slate-400 text-[11px]">Pause Ratio</div>
+                  <div id="metricPause" class="text-sm font-bold text-slate-100 mt-0.5">--</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Transcript & Filler Word Inspector -->
+          <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                Speech Transcript & Filler Word Scan
+              </span>
+              <span id="fillerBadge" class="text-xs font-medium px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                0 Fillers Detected
+              </span>
+            </div>
+            <div id="transcriptBox" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-300 leading-relaxed font-normal max-h-48 overflow-y-auto custom-scrollbar">
+              No speech detected.
+            </div>
+          </div>
+
+          <!-- Actionable Coaching Advice: Strengths & Improvements -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- Strengths -->
+            <div class="p-5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 flex flex-col gap-3">
+              <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Candidate Strengths
+              </div>
+              <ul id="strengthsList" class="space-y-2 text-xs text-slate-300"></ul>
+            </div>
+
+            <!-- Actionable Improvements -->
+            <div class="p-5 rounded-xl bg-amber-950/20 border border-amber-500/20 flex flex-col gap-3">
+              <div class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Priority Improvements
+              </div>
+              <ul id="improvementsList" class="space-y-2 text-xs text-slate-300"></ul>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Interview Questions Pool
+    const PROMPTS = [
+      "Tell me about a complex technical challenge you solved, and how you communicated trade-offs with stakeholders.",
+      "Why are you interested in this position, and how does your previous background prepare you for this role?",
+      "Describe a situation where a project missed a deadline or had a major outage. How did you respond?",
+      "How do you prioritize competing requirements when engineering time and resources are severely constrained?",
+      "Walk me through an architectural decision you made that you would do differently in hindsight."
+    ];
+
+    let mediaStream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordedBlob = null;
+    let selectedFile = null;
+    let recInterval = null;
+    let recSeconds = 0;
+
+    // DOM Elements
+    const liveVideo = document.getElementById('liveVideo');
+    const playbackVideo = document.getElementById('playbackVideo');
+    const camPlaceholder = document.getElementById('camPlaceholder');
+    const recIndicator = document.getElementById('recIndicator');
+    const recTimer = document.getElementById('recTimer');
+    const btnToggleCam = document.getElementById('btnToggleCam');
+    const btnToggleCamText = document.getElementById('btnToggleCamText');
+    const btnRecord = document.getElementById('btnRecord');
+    const btnRecordText = document.getElementById('btnRecordText');
+    const btnAnalyze = document.getElementById('btnAnalyze');
+    const tabWebcam = document.getElementById('tabWebcam');
+    const tabUpload = document.getElementById('tabUpload');
+    const sectionWebcam = document.getElementById('sectionWebcam');
+    const sectionUpload = document.getElementById('sectionUpload');
+    const videoFileInput = document.getElementById('videoFileInput');
+    const uploadSelectedInfo = document.getElementById('uploadSelectedInfo');
+    const uploadFilename = document.getElementById('uploadFilename');
+    const uploadFilesize = document.getElementById('uploadFilesize');
+    const btnLoadDemo = document.getElementById('btnLoadDemo');
+    const loadingBox = document.getElementById('loadingBox');
+    const loadingStageText = document.getElementById('loadingStageText');
+    const errorBox = document.getElementById('errorBox');
+    const emptyState = document.getElementById('emptyState');
+    const resultsDashboard = document.getElementById('resultsDashboard');
+    const btnNewPrompt = document.getElementById('btnNewPrompt');
+    const promptText = document.getElementById('promptText');
+
+    // Shuffle Prompt
+    btnNewPrompt.addEventListener('click', () => {
+      const cur = promptText.textContent;
+      let next = cur;
+      while (next === cur) {
+        next = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+      }
+      promptText.textContent = `"${next}"`;
+    });
+
+    // Tab Switching
+    tabWebcam.addEventListener('click', () => {
+      tabWebcam.className = 'px-2.5 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white transition';
+      tabUpload.className = 'px-2.5 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition';
+      sectionWebcam.classList.remove('hidden');
+      sectionUpload.classList.add('hidden');
+      checkReadyToAnalyze();
+    });
+
+    tabUpload.addEventListener('click', () => {
+      tabUpload.className = 'px-2.5 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white transition';
+      tabWebcam.className = 'px-2.5 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition';
+      sectionUpload.classList.remove('hidden');
+      sectionWebcam.classList.add('hidden');
+      checkReadyToAnalyze();
+    });
+
+    // Toggle Camera
+    btnToggleCam.addEventListener('click', async () => {
+      if (mediaStream) {
+        stopWebcam();
+      } else {
+        await startWebcam();
+      }
+    });
+
+    async function startWebcam() {
+      try {
+        hideError();
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: true
+        });
+        liveVideo.srcObject = mediaStream;
+        liveVideo.classList.remove('hidden');
+        playbackVideo.classList.add('hidden');
+        camPlaceholder.classList.add('hidden');
+        btnToggleCamText.textContent = 'Stop Webcam';
+        btnRecord.disabled = false;
+      } catch (err) {
+        showError('Could not access webcam/microphone: ' + err.message);
+      }
+    }
+
+    function stopWebcam() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopRecording();
+      }
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
+      }
+      liveVideo.srcObject = null;
+      liveVideo.classList.add('hidden');
+      camPlaceholder.classList.remove('hidden');
+      btnToggleCamText.textContent = 'Start Webcam';
+      btnRecord.disabled = true;
+    }
+
+    // Record / Stop Record
+    btnRecord.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    });
+
+    function startRecording() {
+      recordedChunks = [];
+      recordedBlob = null;
+      playbackVideo.classList.add('hidden');
+      liveVideo.classList.remove('hidden');
+
+      const options = { mimeType: 'video/webm;codecs=vp8,opus' };
+      try {
+        mediaRecorder = new MediaRecorder(mediaStream, options);
+      } catch (e) {
+        mediaRecorder = new MediaRecorder(mediaStream);
+      }
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        recordedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        playbackVideo.src = URL.createObjectURL(recordedBlob);
+        playbackVideo.classList.remove('hidden');
+        liveVideo.classList.add('hidden');
+        checkReadyToAnalyze();
+      };
+
+      mediaRecorder.start(250);
+      recSeconds = 0;
+      recIndicator.classList.remove('hidden');
+      btnRecordText.textContent = 'Stop Recording';
+      btnRecord.className = 'flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs flex items-center justify-center gap-2 transition border border-slate-700';
+
+      recInterval = setInterval(() => {
+        recSeconds++;
+        const mins = String(Math.floor(recSeconds / 60)).padStart(2, '0');
+        const secs = String(recSeconds % 60).padStart(2, '0');
+        recTimer.textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+      clearInterval(recInterval);
+      recIndicator.classList.add('hidden');
+      btnRecordText.textContent = 'Re-record Answer';
+      btnRecord.className = 'flex-1 py-2.5 px-4 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white font-medium text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-rose-600/20';
+    }
+
+    // File Upload Handler
+    videoFileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        selectedFile = file;
+        uploadFilename.textContent = file.name;
+        uploadFilesize.textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+        uploadSelectedInfo.classList.remove('hidden');
+        checkReadyToAnalyze();
+      }
+    });
+
+    // Load Demo Clip Handler
+    btnLoadDemo.addEventListener('click', async () => {
+      try {
+        hideError();
+        loadingBox.classList.remove('hidden');
+        loadingStageText.textContent = 'Fetching pre-packaged demo clip...';
+
+        const res = await fetch('/sample-video');
+        if (!res.ok) throw new Error('Demo video endpoint unavailable.');
+        const blob = await res.blob();
+
+        selectedFile = new File([blob], 'demo_interview.mp4', { type: 'video/mp4' });
+        uploadFilename.textContent = selectedFile.name;
+        uploadFilesize.textContent = (selectedFile.size / (1024 * 1024)).toFixed(1) + ' MB';
+        uploadSelectedInfo.classList.remove('hidden');
+        tabUpload.click();
+        loadingBox.classList.add('hidden');
+        checkReadyToAnalyze();
+      } catch (err) {
+        loadingBox.classList.add('hidden');
+        showError('Demo clip load error: ' + err.message);
+      }
+    });
+
+    function checkReadyToAnalyze() {
+      const isWebcamTab = !sectionWebcam.classList.contains('hidden');
+      if (isWebcamTab) {
+        btnAnalyze.disabled = !recordedBlob;
+      } else {
+        btnAnalyze.disabled = !selectedFile;
+      }
+    }
+
+    // Execute Analysis
+    btnAnalyze.addEventListener('click', async () => {
+      hideError();
+      loadingBox.classList.remove('hidden');
+      btnAnalyze.disabled = true;
+
+      const formData = new FormData();
+      const isWebcamTab = !sectionWebcam.classList.contains('hidden');
+
+      if (isWebcamTab && recordedBlob) {
+        formData.append('file', recordedBlob, 'recording.webm');
+      } else if (selectedFile) {
+        formData.append('file', selectedFile, selectedFile.name);
+      } else {
+        showError('No media recording or file selected.');
+        loadingBox.classList.add('hidden');
+        return;
+      }
+
+      loadingStageText.textContent = 'Running facial Action Units, prosodic pitch, and Whisper ASR...';
+
+      try {
+        const res = await fetch('/analyze-interview', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Server analysis error');
+        }
+
+        renderResults(data);
+      } catch (err) {
+        showError('Analysis failed: ' + err.message);
+      } finally {
+        loadingBox.classList.add('hidden');
+        btnAnalyze.disabled = false;
+      }
+    });
+
+    function renderResults(data) {
+      emptyState.classList.add('hidden');
+      resultsDashboard.classList.remove('hidden');
+
+      const scores = data.scores || {};
+      const overall = scores.overall_delivery_score || 0;
+      const conf = scores.confidence_score || 0;
+      const clarity = scores.clarity_score || 0;
+      const engage = scores.engagement_score || 0;
+
+      // Overall Score
+      document.getElementById('overallScoreNum').textContent = Math.round(overall);
+      const ring = document.getElementById('overallScoreRing');
+      ring.setAttribute('stroke-dasharray', `${Math.round(overall)}, 100`);
+
+      const badge = document.getElementById('readinessBadge');
+      if (overall >= 85) {
+        badge.textContent = 'Executive Ready';
+        badge.className = 'text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else if (overall >= 70) {
+        badge.textContent = 'Interview Ready';
+        badge.className = 'text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+      } else {
+        badge.textContent = 'Practice Recommended';
+        badge.className = 'text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      }
+
+      // Pillars
+      document.getElementById('scoreConfidenceNum').textContent = `${Math.round(conf)}/100`;
+      document.getElementById('barConfidence').style.width = `${Math.round(conf)}%`;
+
+      document.getElementById('scoreClarityNum').textContent = `${Math.round(clarity)}/100`;
+      document.getElementById('barClarity').style.width = `${Math.round(clarity)}%`;
+
+      document.getElementById('scoreEngagementNum').textContent = `${Math.round(engage)}/100`;
+      document.getElementById('barEngagement').style.width = `${Math.round(engage)}%`;
+
+      // Granular Metrics
+      const facial = (data.metrics && data.metrics.facial) || {};
+      const vocal = (data.metrics && data.metrics.vocal) || {};
+      const speech = (data.metrics && data.metrics.speech) || {};
+
+      document.getElementById('metricEyeContact').textContent = `${facial.eye_contact_ratio || 0}%`;
+      document.getElementById('metricBlinkRate').textContent = `${facial.blink_rate_bpm || 0} BPM`;
+      document.getElementById('metricWarmth').textContent = `${Math.round(facial.warmth_score || 0)}/100`;
+      document.getElementById('metricPoise').textContent = `${Math.round(facial.head_stability_score || 0)}/100`;
+
+      document.getElementById('metricPacing').textContent = `${Math.round(vocal.words_per_minute || 0)} WPM`;
+      document.getElementById('metricPitch').textContent = vocal.is_monotone ? 'Monotone (Flat)' : 'Expressive (Dynamic)';
+      document.getElementById('metricEnergy').textContent = `${Math.round(vocal.vocal_energy_score || 0)}/100`;
+      document.getElementById('metricPause').textContent = `${Math.round((vocal.pause_ratio || 0) * 100)}% silence`;
+
+      // Transcript with Highlighted Fillers
+      const transcriptBox = document.getElementById('transcriptBox');
+      const rawTranscript = speech.transcript || '';
+      if (rawTranscript && (speech.word_count || 0) > 0) {
+        document.getElementById('fillerBadge').textContent = `${fillerCount} Fillers Detected`;
+        document.getElementById('fillerBadge').className = 'text-xs font-medium px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20';
+        const highlighted = rawTranscript.replace(
+          /\b(um|uh|er|ah|like|you\s+know|sort\s+of|kind\s+of|actually|basically|literally|i\s+mean)\b/gi,
+          match => `<span class="bg-amber-500/25 text-amber-300 font-semibold px-1 rounded border border-amber-500/40">${match}</span>`
+        );
+        transcriptBox.innerHTML = highlighted;
+      } else {
+        document.getElementById('fillerBadge').textContent = '0 Words / Silent Clip';
+        document.getElementById('fillerBadge').className = 'text-xs font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700';
+        transcriptBox.innerHTML = '<span class="text-amber-400/90 font-medium italic">No spoken words detected in the recording (ambient room silence or microphone inactive). Speak clearly during your response to receive speech, pacing, and filler word coaching.</span>';
+      }
+
+      // Strengths & Improvements Lists
+      const strengthsList = document.getElementById('strengthsList');
+      strengthsList.innerHTML = '';
+      (data.strengths || []).forEach(s => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2';
+        li.innerHTML = `<svg class="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg><span>${s}</span>`;
+        strengthsList.appendChild(li);
+      });
+
+      const improvementsList = document.getElementById('improvementsList');
+      improvementsList.innerHTML = '';
+      (data.actionable_improvements || []).forEach(imp => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2';
+        li.innerHTML = `<svg class="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01"/></svg><span>${imp}</span>`;
+        improvementsList.appendChild(li);
+      });
+
+      // Smooth scroll to results
+      resultsDashboard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    function hideError() {
+      errorBox.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
