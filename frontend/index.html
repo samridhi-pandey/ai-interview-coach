@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Interview Preparation Coach</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-top">
+        <h1>AI Interview Preparation Coach</h1>
+        <span id="modeBadge" class="badge">checking…</span>
+      </div>
+      <p class="tagline">Improve your CV. Practice your interview. Know your readiness.</p>
+      <p class="privacy">🔒 Your resume and interview responses are used only for this practice session and are not permanently stored.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="cv" role="tab">1 · CV Analyzer</button>
+      <button class="tab" data-tab="interview" role="tab">2 · Interview Preparation</button>
+    </nav>
+
+    <!-- ============ MODULE 1: CV ANALYZER ============ -->
+    <section id="tab-cv" class="panel">
+      <div class="card">
+        <h2>Upload your CV</h2>
+        <p class="muted">PDF or DOCX, up to 5 MB. We extract the text, score it like an ATS, and give recommendations.</p>
+        <label id="dropzone" class="dropzone" for="cvFile">
+          <input id="cvFile" type="file" accept=".pdf,.docx" hidden>
+          <div class="drop-icon">📄</div>
+          <div><strong>Drag &amp; drop your CV here</strong> or <span class="link">browse files</span></div>
+        </label>
+        <div id="fileInfo" class="file-info hidden"></div>
+        <div class="row">
+          <button id="analyzeBtn" class="btn primary" disabled>Analyze CV</button>
+          <span id="cvLoading" class="loading hidden"><span class="spinner"></span> Analyzing your CV…</span>
+        </div>
+        <div id="cvError" class="error hidden"></div>
+      </div>
+
+      <div id="cvResult" class="hidden">
+        <div class="card">
+          <div id="cvNote" class="note hidden"></div>
+          <div class="ats-head">
+            <div class="ring" id="atsRing"><div class="ring-inner"><span id="atsScore">0</span><small>/ 100</small></div></div>
+            <div class="ats-side">
+              <h2>ATS Score</h2>
+              <p class="muted">Transparent, rule-based score computed from the text of your CV.</p>
+              <div id="catBars" class="bars"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card"><h3>Detected sections</h3><div id="sections" class="chips"></div></div>
+          <div class="card"><h3>Detected skills</h3><div id="skills" class="chips"></div></div>
+        </div>
+        <div class="grid3">
+          <div class="card good"><h3>✅ Strengths</h3><ul id="strengths"></ul></div>
+          <div class="card warn"><h3>⚠️ Areas to improve</h3><ul id="areas"></ul></div>
+          <div class="card info"><h3>💡 Recommendations</h3><ul id="recs"></ul></div>
+        </div>
+        <details class="card">
+          <summary>Extracted resume text (preview)</summary>
+          <pre id="cvPreview"></pre>
+        </details>
+        <div class="cta">
+          <button id="goInterview" class="btn primary big">Start AI Interview →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 2: INTERVIEW ============ -->
+    <section id="tab-interview" class="panel hidden">
+      <!-- setup -->
+      <div id="setup" class="card">
+        <h2>Set up your mock interview</h2>
+        <div class="field">
+          <label>Interview domain</label>
+          <div class="seg" id="domainSeg">
+            <button class="seg-btn active" data-value="Technical">
+              <strong>Technical</strong><small>Programming, DSA, OOP, DBMS, OS, Networks, Security and CS concepts — practical &amp; conceptual</small>
+            </button>
+            <button class="seg-btn" data-value="HR">
+              <strong>HR</strong><small>Introduction, teamwork, leadership, conflict, motivation, behavioral &amp; situational</small>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Difficulty</label>
+          <div class="seg small" id="diffSeg">
+            <button class="seg-btn" data-value="Easy"><strong>Easy</strong></button>
+            <button class="seg-btn active" data-value="Medium"><strong>Medium</strong></button>
+            <button class="seg-btn" data-value="Hard"><strong>Hard</strong></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>CV context <span class="muted">(optional)</span></label>
+          <div id="cvContext" class="cv-context"></div>
+        </div>
+        <div class="row">
+          <button id="startBtn" class="btn primary big">Start Interview</button>
+          <span id="startLoading" class="loading hidden"><span class="spinner"></span> Preparing your first question…</span>
+        </div>
+        <div id="startError" class="error hidden"></div>
+      </div>
+
+      <!-- question -->
+      <div id="qCard" class="card hidden">
+        <div class="progress"><div id="progressBar"></div></div>
+        <div class="q-meta">
+          <span id="qCount" class="pill">Question 1 of 5</span>
+          <span id="qTopic" class="pill soft"></span>
+          <span id="qType" class="pill soft"></span>
+        </div>
+        <h2 id="qText" class="question"></h2>
+        <textarea id="answerBox" rows="7" maxlength="4000" placeholder="Type your answer as you would say it in the interview…"></textarea>
+        <div class="row">
+          <button id="submitBtn" class="btn primary">Submit answer</button>
+          <span id="charCount" class="muted">0 / 4000</span>
+          <span id="evalLoading" class="loading hidden"><span class="spinner"></span> Evaluating your answer…</span>
+        </div>
+        <div id="answerError" class="error hidden"></div>
+      </div>
+
+      <!-- feedback -->
+      <div id="fbCard" class="card hidden">
+        <div class="fb-head">
+          <div class="big-score"><span id="fbScore">0</span><small>/10</small></div>
+          <div class="sub-scores">
+            <div class="sub"><small>Communication</small><b id="fbComm">0</b></div>
+            <div class="sub"><small id="fbTechLabel">Technical Depth</small><b id="fbTech">0</b></div>
+            <div class="sub"><small>Confidence</small><b id="fbConf">0</b></div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div><h3>Strengths</h3><ul id="fbStrengths"></ul></div>
+          <div><h3>Areas for improvement</h3><ul id="fbImprove"></ul></div>
+        </div>
+        <h3>Feedback</h3><p id="fbText"></p>
+        <h3>Sample strong answer</h3><p id="fbIdeal" class="ideal"></p>
+        <div class="row">
+          <button id="nextBtn" class="btn primary big">Next question →</button>
+          <span id="reportLoading" class="loading hidden"><span class="spinner"></span> Generating your report…</span>
+        </div>
+        <div id="fbError" class="error hidden"></div>
+      </div>
+
+      <!-- report -->
+      <div id="reportCard" class="hidden">
+        <div class="card">
+          <div id="reportNote" class="note hidden"></div>
+          <h2>AI Interview Readiness Report</h2>
+          <p class="muted" id="reportMeta"></p>
+          <div class="report-top">
+            <div class="ring" id="readyRing"><div class="ring-inner"><span id="readyPct">0</span><small>% ready</small></div></div>
+            <div class="report-stats">
+              <div class="stat"><small>Overall score</small><b id="rOverall">0</b><span>/100</span></div>
+              <div class="stat"><small>Communication</small><b id="rComm">0</b><span>/10</span></div>
+              <div class="stat"><small id="rTechLabel">Technical Depth</small><b id="rTech">0</b><span>/10</span></div>
+              <div class="stat"><small>Confidence</small><b id="rConf">0</b><span>/10</span></div>
+            </div>
+          </div>
+          <h3>Question scores</h3>
+          <div id="qScores" class="bars"></div>
+        </div>
+        <div class="grid2">
+          <div class="card good"><h3>Strong areas</h3><ul id="rStrong"></ul></div>
+          <div class="card warn"><h3>Areas to improve</h3><ul id="rImprove"></ul></div>
+        </div>
+        <div class="card info"><h3>Top 3 recommendations</h3><ol id="rTips"></ol></div>
+        <div class="cta"><button id="restartBtn" class="btn primary big">Practice again</button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap muted small-foot">AI Interview Preparation Coach · TCS Tech Day AI Hackathon prototype</footer>
+  <script src="/app.js"></script>
+</body>
+</html>
